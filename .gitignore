@@ -1,0 +1,18 @@
+bin/
+obj/
+.vs/
+TestResults/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / JetBrains
+.idea/
+
+
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
