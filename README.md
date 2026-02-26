@@ -25,9 +25,10 @@ Prerequisite: **.NET 8 SDK**
 
 ```bash
 dotnet run
-
 Test:
+
 dotnet test
 
 Demo:
+
 Demo video
