@@ -31,9 +31,5 @@ To run the test suite:
 Bash
 dotnet test
 Demo
-
-
-https://github.com/user-attachments/assets/421dbe1a-8107-4a9b-9082-1c0e54f37aae
-
-
 Watch the Minimax algorithm in action: 
+https://github.com/user-attachments/assets/421dbe1a-8107-4a9b-9082-1c0e54f37aae
