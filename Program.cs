@@ -21,7 +21,7 @@ while (game.Status == BoardStatus.InProgress)
     
     bool success = game.PlayTurn(move[0], move[1]); 
 
-    if (success == false) //
+    if (!success)
     {
         Console.WriteLine("Invalid move! Press Enter to try again..."); 
         Console.ReadLine(); 
@@ -46,9 +46,7 @@ static void Render(Board b) //
                 CellState.O => 'O', 
                 _ => ' ' 
             };
-
             Console.Write($" {ch} "); 
-
             if (c < Board.Dimension - 1) Console.Write("|"); 
         }
 

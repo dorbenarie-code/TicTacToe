@@ -18,7 +18,7 @@ public enum BoardStatus
 public class Board
 {
     public const int Dimension = 3;
-    private CellState[,] grid;
+    private readonly CellState[,] grid;
     private int filledCells;
 
     public Board()
@@ -26,6 +26,7 @@ public class Board
         grid = new CellState[Dimension, Dimension];
         filledCells = 0;
     }
+
     public Board(Board otherBoard)
     {
         grid = new CellState[Dimension, Dimension];
@@ -38,8 +39,6 @@ public class Board
         }
         filledCells = otherBoard.filledCells;
     }
-
-
 
     public CellState this[int row, int col]
     {
@@ -73,30 +72,18 @@ public class Board
         
         for (int i = 0; i < Dimension; i++)
         {
-            if (IsLineWinner(grid[i, 0], grid[i, 1], grid[i, 2], out winner))
-            {
-                if (winner == CellState.X) return BoardStatus.XWins;
-                return BoardStatus.OWins;
-            }
+            winner = GetLineWinner(grid[i, 0], grid[i, 1], grid[i, 2]);
+            if (winner != CellState.Empty) return ConvertWinnerToStatus(winner);
 
-            if (IsLineWinner(grid[0, i], grid[1, i], grid[2, i], out winner))
-            {
-                if (winner == CellState.X) return BoardStatus.XWins;
-                return BoardStatus.OWins;
-            }
+            winner = GetLineWinner(grid[0, i], grid[1, i], grid[2, i]);
+            if (winner != CellState.Empty) return ConvertWinnerToStatus(winner);
         }
 
-        if (IsLineWinner(grid[0, 0], grid[1, 1], grid[2, 2], out winner))
-        {
-            if (winner == CellState.X) return BoardStatus.XWins;
-            return BoardStatus.OWins;
-        }
+        winner = GetLineWinner(grid[0, 0], grid[1, 1], grid[2, 2]);
+        if (winner != CellState.Empty) return ConvertWinnerToStatus(winner);
 
-        if (IsLineWinner(grid[0, 2], grid[1, 1], grid[2, 0], out winner))
-        {
-            if (winner == CellState.X) return BoardStatus.XWins;
-            return BoardStatus.OWins;
-        }
+        winner = GetLineWinner(grid[0, 2], grid[1, 1], grid[2, 0]);
+        if (winner != CellState.Empty) return ConvertWinnerToStatus(winner);
 
         if (filledCells == Dimension * Dimension)
         {
@@ -106,15 +93,19 @@ public class Board
         return BoardStatus.InProgress;
     }
 
-    private static bool IsLineWinner(CellState a, CellState b, CellState c, out CellState winner)
+    private static CellState GetLineWinner(CellState a, CellState b, CellState c)
     {
         if (a != CellState.Empty && a == b && b == c)
         {
-            winner = a;
-            return true;
+            return a;
         }
         
-        winner = CellState.Empty;
-        return false;
+        return CellState.Empty;
+    }
+
+    private static BoardStatus ConvertWinnerToStatus(CellState winner)
+    {
+        if (winner == CellState.X) return BoardStatus.XWins;
+        return BoardStatus.OWins;
     }
 }

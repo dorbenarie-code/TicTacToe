@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Generic;
 using TicTacToe.Domain;
-
 namespace TicTacToe.Players;
 
 public class MinimaxPlayer : IPlayer
 {
-    private CellState myMark;
+    private readonly CellState myMark;
 
     public MinimaxPlayer(CellState mark)
     {
@@ -14,98 +14,87 @@ public class MinimaxPlayer : IPlayer
 
     public int[] GetMove(Board currentBoard)
     {
-        int bestScore = (myMark == CellState.X) ? int.MinValue : int.MaxValue;
+        bool isMaximizing = (myMark == CellState.X);
+        int bestScore = isMaximizing ? int.MinValue : int.MaxValue;
         int[] bestMove = new int[2];
         
-        CellState opponentMark = (myMark == CellState.X) ? CellState.O : CellState.X;
+        CellState opponentMark = isMaximizing ? CellState.O : CellState.X;
 
-        for (int r = 0; r < Board.Dimension; r++)
+        List<int[]> emptyCells = GetEmptyCells(currentBoard);
+
+        foreach (int[] cell in emptyCells)
         {
-            for (int c = 0; c < Board.Dimension; c++)
+            int r = cell[0];
+            int c = cell[1];
+
+            Board draftBoard = new Board(currentBoard);
+            draftBoard.TryMakeMove(r, c, myMark);
+
+            int score = Minimax(draftBoard, opponentMark, 0);
+
+            bool foundBetterMove = isMaximizing ? (score > bestScore) : (score < bestScore);
+            
+            if (foundBetterMove)
             {
-                if (currentBoard[r, c] == CellState.Empty)
-                {
-                    Board draftBoard = new Board(currentBoard);
-                    
-                    draftBoard.TryMakeMove(r, c, myMark);
-
-                    int score = Minimax(draftBoard, opponentMark, 0);
-
-                    if (myMark == CellState.X)
-                    {
-                        if (score > bestScore)
-                        {
-                            bestScore = score;
-                            bestMove[0] = r;
-                            bestMove[1] = c;
-                        }
-                    }
-                    else 
-                    {
-                        if (score < bestScore)
-                        {
-                            bestScore = score;
-                            bestMove[0] = r;
-                            bestMove[1] = c;
-                        }
-                    }
-                }
+                bestScore = score;
+                bestMove[0] = r;
+                bestMove[1] = c;
             }
         }
 
         return bestMove;
     }
 
-    private int Minimax(Board currentBoard, CellState currentTurn, int depth)
+    private static int Minimax(Board currentBoard, CellState currentTurn, int depth)
     {
         BoardStatus status = currentBoard.GetStatus();
 
         if (status == BoardStatus.XWins) return 10 - depth;
-        else if (status == BoardStatus.OWins) return -10 + depth;
-        else if (status == BoardStatus.Draw) return 0;
+        if (status == BoardStatus.OWins) return -10 + depth;
+        if (status == BoardStatus.Draw) return 0;
 
-        if (status == BoardStatus.InProgress)
+        bool isMaximizing = (currentTurn == CellState.X);
+        int bestScore = isMaximizing ? int.MinValue : int.MaxValue;
+        CellState nextTurn = isMaximizing ? CellState.O : CellState.X;
+
+        List<int[]> emptyCells = GetEmptyCells(currentBoard);
+
+        foreach (int[] cell in emptyCells)
         {
-            if (currentTurn == CellState.X)
+            int r = cell[0];
+            int c = cell[1];
+
+            Board draftBoard = new Board(currentBoard);
+            draftBoard.TryMakeMove(r, c, currentTurn);
+            
+            int score = Minimax(draftBoard, nextTurn, depth + 1);
+
+            if (isMaximizing)
             {
-                int bestScore = int.MinValue;
-                for (int r = 0; r < Board.Dimension; r++)
-                {
-                    for (int c = 0; c < Board.Dimension; c++)
-                    {
-                        if (currentBoard[r, c] == CellState.Empty)
-                        {
-                            Board draftBoard = new Board(currentBoard);
-                            draftBoard.TryMakeMove(r, c, CellState.X);
-                            
-                            int score = Minimax(draftBoard, CellState.O, depth + 1);
-                            bestScore = Math.Max(bestScore, score);
-                        }
-                    }
-                }
-                return bestScore;
+                bestScore = Math.Max(bestScore, score);
             }
-            else 
+            else
             {
-                int bestScore = int.MaxValue;
-                for (int r = 0; r < Board.Dimension; r++)
-                {
-                    for (int c = 0; c < Board.Dimension; c++)
-                    {
-                        if (currentBoard[r, c] == CellState.Empty)
-                        {
-                            Board draftBoard = new Board(currentBoard);
-                            draftBoard.TryMakeMove(r, c, CellState.O);
-                            
-                            int score = Minimax(draftBoard, CellState.X, depth + 1);
-                            bestScore = Math.Min(bestScore, score);
-                        }
-                    }
-                }
-                return bestScore;
+                bestScore = Math.Min(bestScore, score);
             }
         }
 
-        return 0;
+        return bestScore;
+    }
+
+    private static List<int[]> GetEmptyCells(Board board)
+    {
+        List<int[]> emptyCells = new List<int[]>();
+        for (int r = 0; r < Board.Dimension; r++)
+        {
+            for (int c = 0; c < Board.Dimension; c++)
+            {
+                if (board[r, c] == CellState.Empty)
+                {
+                    emptyCells.Add(new int[] { r, c });
+                }
+            }
+        }
+        return emptyCells;
     }
 }
