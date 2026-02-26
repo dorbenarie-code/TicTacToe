@@ -25,12 +25,9 @@ Prerequisite: **.NET 8 SDK**
 
 ```bash
 dotnet run
-Test
+```
+Tests
+To run the test suite:
 dotnet test
 Demo
-
-Demo video
-
-
-
-```bash
+Watch the Minimax algorithm in action:
