@@ -25,7 +25,8 @@ Prerequisite: **.NET 8 SDK**
 
 ```bash
 dotnet run
-```
+````
+
 Tests
 To run the test suite:
 dotnet test
