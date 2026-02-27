@@ -1,56 +1,17 @@
-﻿using System;
-using TicTacToe.Domain;
-using TicTacToe.Players; 
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-GameManager game = new GameManager(); 
+// 1. יוצרים את ה"בנאי" של שרת האינטרנט שלנו
+var builder = WebApplication.CreateBuilder(args);
 
-IPlayer playerX = new MinimaxPlayer(CellState.X);
-IPlayer playerO = new HumanPlayer(CellState.O);
+// 2. אומרים לשרת: "תכיר, יש לנו Controllers בפרויקט שצריך להפעיל"
+builder.Services.AddControllers();
 
-while (game.Status == BoardStatus.InProgress) 
-{
-    Console.Clear(); 
-    Render(game.GameBoard); 
-    Console.WriteLine(); 
-    Console.WriteLine($"It's {game.CurrentTurn}'s turn!"); 
+// 3. בונים את האפליקציה
+var app = builder.Build();
 
-    IPlayer currentPlayer = (game.CurrentTurn == CellState.X) ? playerX : playerO;
-    
-    
-    int[] move = currentPlayer.GetMove(game.GameBoard);
-    
-    bool success = game.PlayTurn(move[0], move[1]); 
+// 4. ממפים את הכתובות (כדי שהשרת ידע לנתב את http://.../api/game ל-GameController)
+app.MapControllers();
 
-    if (!success)
-    {
-        Console.WriteLine("Invalid move! Press Enter to try again..."); 
-        Console.ReadLine(); 
-    }
-}
-
-Console.Clear(); 
-Render(game.GameBoard); 
-Console.WriteLine(); 
-Console.WriteLine($"Game Over! Result: {game.Status}"); 
-
-
-static void Render(Board b) //
-{
-    for (int r = 0; r < Board.Dimension; r++) 
-    {
-        for (int c = 0; c < Board.Dimension; c++) 
-        {
-            char ch = b[r, c] switch 
-            {
-                CellState.X => 'X', 
-                CellState.O => 'O', 
-                _ => ' ' 
-            };
-            Console.Write($" {ch} "); 
-            if (c < Board.Dimension - 1) Console.Write("|"); 
-        }
-
-        Console.WriteLine(); //
-        if (r < Board.Dimension - 1) Console.WriteLine("---+---+---"); 
-    }
-}
+// 5. מפעילים את השרת! (מרגע זה התוכנית מאזינה לבקשות ולא נסגרת)
+app.Run("http://localhost:5114");

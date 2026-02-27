@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using TicTacToe.Domain;
 namespace TicTacToe.Players;
-
 public class MinimaxPlayer : IPlayer
 {
     private readonly CellState myMark;
@@ -19,26 +17,26 @@ public class MinimaxPlayer : IPlayer
         int[] bestMove = new int[2];
         
         CellState opponentMark = isMaximizing ? CellState.O : CellState.X;
-
-        List<int[]> emptyCells = GetEmptyCells(currentBoard);
-
-        foreach (int[] cell in emptyCells)
+        for (int r = 0; r < Board.Dimension; r++)
         {
-            int r = cell[0];
-            int c = cell[1];
-
-            Board draftBoard = new Board(currentBoard);
-            draftBoard.TryMakeMove(r, c, myMark);
-
-            int score = Minimax(draftBoard, opponentMark, 0);
-
-            bool foundBetterMove = isMaximizing ? (score > bestScore) : (score < bestScore);
-            
-            if (foundBetterMove)
+            for (int c = 0; c < Board.Dimension; c++)
             {
-                bestScore = score;
-                bestMove[0] = r;
-                bestMove[1] = c;
+                if (currentBoard[r, c] == CellState.Empty)
+                {
+                    Board draftBoard = new Board(currentBoard);
+                    draftBoard.TryMakeMove(r, c, myMark);
+
+                    int score = Minimax(draftBoard, opponentMark, 0);
+
+                    bool foundBetterMove = isMaximizing ? (score > bestScore) : (score < bestScore);
+                    
+                    if (foundBetterMove)
+                    {
+                        bestScore = score;
+                        bestMove[0] = r;
+                        bestMove[1] = c;
+                    }
+                }
             }
         }
 
@@ -57,44 +55,30 @@ public class MinimaxPlayer : IPlayer
         int bestScore = isMaximizing ? int.MinValue : int.MaxValue;
         CellState nextTurn = isMaximizing ? CellState.O : CellState.X;
 
-        List<int[]> emptyCells = GetEmptyCells(currentBoard);
-
-        foreach (int[] cell in emptyCells)
-        {
-            int r = cell[0];
-            int c = cell[1];
-
-            Board draftBoard = new Board(currentBoard);
-            draftBoard.TryMakeMove(r, c, currentTurn);
-            
-            int score = Minimax(draftBoard, nextTurn, depth + 1);
-
-            if (isMaximizing)
-            {
-                bestScore = Math.Max(bestScore, score);
-            }
-            else
-            {
-                bestScore = Math.Min(bestScore, score);
-            }
-        }
-
-        return bestScore;
-    }
-
-    private static List<int[]> GetEmptyCells(Board board)
-    {
-        List<int[]> emptyCells = new List<int[]>();
+        // אותה לוגיקה גם ברקורסיה - חוסך אלפי הקצאות זיכרון!
         for (int r = 0; r < Board.Dimension; r++)
         {
             for (int c = 0; c < Board.Dimension; c++)
             {
-                if (board[r, c] == CellState.Empty)
+                if (currentBoard[r, c] == CellState.Empty)
                 {
-                    emptyCells.Add(new int[] { r, c });
+                    Board draftBoard = new Board(currentBoard);
+                    draftBoard.TryMakeMove(r, c, currentTurn);
+                    
+                    int score = Minimax(draftBoard, nextTurn, depth + 1);
+
+                    if (isMaximizing)
+                    {
+                        bestScore = Math.Max(bestScore, score);
+                    }
+                    else
+                    {
+                        bestScore = Math.Min(bestScore, score);
+                    }
                 }
             }
         }
-        return emptyCells;
+
+        return bestScore;
     }
 }
